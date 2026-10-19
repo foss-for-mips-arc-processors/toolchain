@@ -46,11 +46,12 @@ if {[check_target_archs]} {
 } elseif {[check_target_arc64_64]} {
     lappend qemu_flags -cpu hs6x
     set qemu_arch "arc64"
+} elseif {[check_target_arcv]} {
+    # Same as nSIM: setup_sim runs <target_alias>-run from PATH.
+    # For Linux that is scripts/wrapper/qemu/riscv64-linux-run.
 } else {
     perror "Unknown CPU configuration"
 }
-
-set qemu_bin "$::env(QEMU_HOME)/bin/qemu-${qemu_arch}"
 
 set_board_info sim_time_limit 300
 # If we test libstdc++ increase the time.
@@ -58,8 +59,13 @@ if {$tool == "libstdc++"} {
     set_board_info sim_time_limit 1200
 }
 
-# Setup the QEMU simulator.
-set_board_info sim "$qemu_bin [join $qemu_flags]"
+# Setup the QEMU simulator. RISC-V uses the arcv-gnu-toolchain wrapper.
+if {[check_target_arcv]} {
+    setup_sim riscv
+} else {
+    set qemu_bin "$::env(QEMU_HOME)/bin/qemu-${qemu_arch}"
+    set_board_info sim "$qemu_bin [join $qemu_flags]"
+}
 set_board_info is_simulator 1
 
 set_board_info compiler "[find_gcc]"
