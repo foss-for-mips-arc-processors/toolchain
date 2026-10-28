@@ -62,6 +62,11 @@ if {$tool == "libstdc++"} {
 # Setup the QEMU simulator. RISC-V uses the arcv-gnu-toolchain wrapper.
 if {[check_target_arcv]} {
     setup_sim riscv
+    # Optional: RISCV_QEMU_MTUNE=arc-v-rpx-100-series|mips-i8500
+    # wrapper -Wmtune,<name> so LD_LIBRARY_PATH uses that multilib CPU dir.
+    if {[info exists ::env(RISCV_QEMU_MTUNE)] && $::env(RISCV_QEMU_MTUNE) ne ""} {
+	set_board_info sim,options "-Wmtune,$::env(RISCV_QEMU_MTUNE)"
+    }
 } else {
     set qemu_bin "$::env(QEMU_HOME)/bin/qemu-${qemu_arch}"
     set_board_info sim "$qemu_bin [join $qemu_flags]"
